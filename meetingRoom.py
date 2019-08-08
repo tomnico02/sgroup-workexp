@@ -14,11 +14,13 @@ for line in f:
         found = True
         bookingYN = input("You already have previous bookings, would you to view them? ")
         if bookingYN == "Yes":
-            with open("bookingLog.csv", 'r') as inp:
-                row = csv.reader(inp)
-        for i in row:
-            if name in i[0]:
-                print(i[1:5])
+                with open('bookingLog.csv', 'rt') as f:
+                    reader = csv.reader(f, delimiter=',')
+                    for row in reader:
+                        if name == row[0]:
+                            print("Date booked: " +row[1] +" " +row[2] +" " +row[3] +" Meeting Time: " +row[4] +"-" +row[5])
+        else:
+            None
 
 
 print("You will now need to enter the date you are booking the meeting room for.")
@@ -32,10 +34,9 @@ presentDay = float(today.strftime('%d'))
 presentMonth = float(today.strftime('%m'))
 presentYear = float(today.strftime('%Y'))
 
-
 #Makes sure days of month are capped at 31
 bookingDay = int(input("Enter the day you are booking: "))
-while (bookingDay >= 32 or bookingDay < presentDay):
+while bookingDay >= 32:
     print("Make sure the day is in range 1-31 and is not in the past.")
     bookingDay = int(input("Enter the day you are booking: "))
 
@@ -61,24 +62,11 @@ monthsOfYear = {
 temp = (monthsOfYear[userMonth])
 bookingMonth = temp
 
-while (bookingMonth >12 or bookingMonth > presentMonth):
-    print("Make sure the month you entered is correct and is not in the past.")
-    bookingMonth = int(input("Enter the day month are booking: "))
-
 #Makes sure the year booked is capped at 2100
 bookingYear = int(input("Enter the year you are booking: "))
-while (bookingYear > 2100 or bookingYear < presentYear):
-    print("Make sure the year you inputted is not after 2100 and is not in the past.")
-    bookingDay = int(input("Enter the year you are booking: "))
-
-
-if (bookingDay < presentDay):
-    ("The date you have inputted has already occured, please try again.")
-elif (bookingMonth < presentMonth):
-    ("The date you have inputted has already occured, please try again.")
-elif (bookingYear < presentYear):
-    ("The date you have inputted has already occured, please try again.")
-
+while bookingYear > 2030:
+    print("Make sure the year you inputted is not after 2030 and is not in the past.")
+    bookingYear = int(input("Enter the year you are booking: "))
 
 
 bookingDate = (bookingDay + bookingMonth + bookingYear)
@@ -97,40 +85,31 @@ else:
 #Reading and writing to the text file
 strDay = str(bookingDay)
 strYear = str(bookingYear)
-strTime1 = str(startTime)
-strTime2 = str(endTime)
 
-if (startTime < presentTime):
-    ("This time slot has already passed.")
+time1 = str(startTime)
+time2 = str(endTime)
 
-elif (bookingDay < presentDay):
-    ("Error. You are trying to book a date in the past.")
-
-elif (userMonth < bookingMonth):
-    ("Error. You are trying to book a date in the past.")
-
-elif (bookingYear < presentYear):
-    ("Error. You are trying to book a date in the past.")
-
+if len(time1) == 3:
+    temp1 = '0' + time1
+    temp2 = temp1[:2] + ':' + temp1[2:]
+    time1 = temp2
 else:
-    booking = [name, strDay, userMonth, strYear, strTime1, strTime2]
+    temp = time1[:2] + ':' + time1[2:]
 
-    with open('bookingLog.csv', mode='a') as csv_file:
-        fieldnames = ['Name', 'Day', 'Month', 'Year', 'Meeting Starts', 'Meeting Ends']
-        writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
-        writer.writeheader()
+if len(time2) == 3:
+    temp1 = '0' + time2
+    temp2 = temp1[:2] + ':' + temp1[2:]
+    time2 = temp2
+else:
+    temp = time2[:2] + ':' + time2[2:]
 
-    with open("bookingLog.csv", "a") as f:
-        for item in booking:
-            f.write("%s," % item)
+booking = [name, strDay, userMonth, strYear, time1, time2]
 
-
-#while (emptySlot != True):
- #   break
-  #  if bookingDate:
-   #     emptySlot = True
-    #elif startTime:
-     #   emptySlot = True
-    #elif endTime:
-        #emptySlot = True
+with open('bookingLog.csv', mode='a') as csv_file:
+    fieldnames = ['Name', 'Day', 'Month', 'Year', 'Meeting Starts', 'Meeting Ends']
+    writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
+with open("bookingLog.csv", "a") as f:
+     for item in booking:
+         f.write("%s," % item)
+     f.write("\n")
 
