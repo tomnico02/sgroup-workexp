@@ -98,20 +98,60 @@ def CreateBooking():
 
     bookingDate = ('bookingDay' + 'bookingMonth' + 'bookingYear')
 
-    while (bookingDay < presentDay) and (bookingMonth < presentMonth) and (bookingYear < presentYear) or (bookingYear < presentYear):
+    while (bookingDay <= presentDay) and (bookingMonth <= presentMonth) and (bookingYear <= presentYear) or (bookingYear < presentYear) or (bookingMonth <= presentMonth) and (bookingYear <= presentYear):
         print("Error. The date you have inputted is in the past.")
         bookingDay = int(input("Enter the day you are booking: "))
-        bookingMonth = int(input("Enter the month you are booking: "))
+        userMonth = input("Enter the month you are booking (as a string): ")
+        temp = (monthsOfYear[userMonth])
+        bookingMonth = temp
         bookingYear = int(input("Enter the year you are booking: "))
 
-    print("Now you will enter the booking time. \nYou can use both 12 or 24 hour but use '0930' format.")
+# ----------------------------------------------------------------------------------------------------------------------
+
+    print("Now you will enter the booking time. \nYou can use both 12 or 24 hour but use [HHMM] or [HMM] format.")
     startTime = int(input("Please enter the time the meeting will start: "))
     endTime = int(input("Please enter the time the meeting will end: "))
-    userRoom = input("Please choose a meeting room by typing 1-4: ")
+    print(startTime)
+    print(endTime)
+
+    global time1
+    global time2
+
+    time1 = str(startTime)
+    time2 = str(endTime)
+
+    if len(time1) == 3:
+        temp1 = '0' + time1
+        temp2 = temp1[:2] + ':' + temp1[2:]
+        stringTime1 = temp1[:2] + ':' + temp1[2:]
+        time1 = temp2
+    else:
+        temp = time1[:2] + ':' + time1[2:]
+        time1 = temp
+    if len(time2) == 3:
+        temp1 = '0' + time2
+        temp2 = temp1[:2] + ':' + temp1[2:]
+        time2 = temp2
+    else:
+        temp = time2[:2] + ':' + time2[2:]
+        time2 = temp
+
+# ----------------------------------------------------------------------------------------------------------------------
+
+    while (hour3 > 23) or (minutes3 > 60) or (hour4 > 23) or (minutes4 > 60):
+        print("Error. Please input the time again.")
+        startTime = int(input("Please enter the time the meeting will start: "))
+        endTime = int(input("Please enter the time the meeting will end: "))
+
+    userRoom = int(input("Please choose a meeting room by typing 1-4: "))
+    while 1 > userRoom or userRoom > 4:
+        userRoom = int(input("Please choose a meeting room by typing 1-4: "))
 
     if endTime < startTime:
         print("You have incorrectly inputted your booking, make sure that the start date is before the end date.")
     roomBooked = False
+
+# ----------------------------------------------------------------------------------------------------------------------
 
     csv_file = csv.reader(open('bookingLog.csv', "r"), delimiter=",")
     for roomBooked in csv_file:
@@ -146,7 +186,6 @@ def ViewBooking():
                 print(
                     "Date booked: " + row[1] + " " + row[2] + " " + row[3] + "\nMeeting Time: " + row[4] + "-" + row[5] +"\nRoom Booked: " +row[6])
                 print("--------------------------------------")
-                print("")
     MainMenu()
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -164,43 +203,17 @@ def DeleteBooking():
                 print(
                     "Date booked: " + row[1] + " " + row[2] + " " + row[3] + "\nMeeting Time: " + row[4] + "-" + row[5] +"\nRoom Booked: " +row[6])
                 print("--------------------------------------")
-    whichBookingDate = input("Please enter the date of the booking you want to delete: ")
+    whichBookingDate = input("Please enter the date of the booking you want to delete (DD/MM/YYYY): ")
     whichBookingTime = input("Please enter the start time of the booking you want to delete: ")
     whichBookingRoom = input("Please enter the room of the booking you want to delete: ")
-    with open('bookingLog.csv', 'rt') as f:
-        reader = csv.reader(f, delimiter=',')
-        for row in reader:
+    with open('bookingLog.csv', 'rt') as inp, open('bookingLog_edit.csv', 'wb') as out:
+        writer = csv.writer(out)
+        for row in csv.reader(inp):
             if whichBookingDate and whichBookingTime and whichBookingRoom in row:
+                writer.writerow(row)
                 print("--------------------------------------")
-                print(
-                    "Date booked: " + row[1] + " " + row[2] + " " + row[3] + "\nMeeting Time: " + row[4] + "-" + row[5] +"\nRoom Booked: " +row[6])
-                print("--------------------------------------")
+                print("Booking Deleted.")
     MainMenu()
-
-# ----------------------------------------------------------------------------------------------------------------------
-def StringTime():
-    global time1
-    global time2
-    strDay = str(bookingDay)
-    strYear = str(bookingYear)
-
-    time1 = str(bookingData[0])
-    time2 = str(bookingData[1])
-
-    if len(time1) == 3:
-        temp1 = '0' + time1
-        temp2 = temp1[:2] + ':' + temp1[2:]
-        time1 = temp2
-    else:
-        temp = time1[:2] + ':' + time1[2:]
-        time1 = temp
-    if len(time2) == 3:
-        temp1 = '0' + time2
-        temp2 = temp1[:2] + ':' + temp1[2:]
-        time2 = temp2
-    else:
-        temp = time2[:2] + ':' + time2[2:]
-        time2 = temp
 
 # ----------------------------------------------------------------------------------------------------------------------
 def Booking():
@@ -219,5 +232,4 @@ if __name__ == '__main__':
     CreateBooking()
     ViewBooking()
     DeleteBooking()
-    StringTime()
     Booking()
