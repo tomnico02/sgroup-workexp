@@ -1,5 +1,6 @@
 import datetime
 from datetime import date
+import random
 import csv
 
 # NEW PROGRAM
@@ -8,15 +9,15 @@ import csv
 
 # ----------------------------------------------------------------------------------------------------------------------
 
-global strDay
 global userMonth
 global strYear
 global time1
 global time2
 global roomBooked
-bookingData = list
+
 
 # ----------------------------------------------------------------------------------------------------------------------
+
 def MainMenu():
     print("-------{Meeting Booking System}-------")
     print("1. Create New Booking")
@@ -39,6 +40,7 @@ def MainMenu():
     else:
         MainMenu()
 
+
 # ----------------------------------------------------------------------------------------------------------------------
 def CreateBooking():
     global bookingDay
@@ -48,6 +50,8 @@ def CreateBooking():
     global presentDate
     global bookedDay
     global monthsOfYear
+    global fullRoom
+    global bookingRef
     # Retrieve current date and time
     today = date.today()
     dT = datetime.datetime.now()
@@ -98,7 +102,8 @@ def CreateBooking():
 
     bookingDate = ('bookingDay' + 'bookingMonth' + 'bookingYear')
 
-    while (bookingDay <= presentDay) and (bookingMonth <= presentMonth) and (bookingYear <= presentYear) or (bookingYear < presentYear) or (bookingMonth <= presentMonth) and (bookingYear <= presentYear):
+    while (bookingDay <= presentDay) and (bookingMonth <= presentMonth) and (bookingYear <= presentYear) or (
+            bookingYear < presentYear) or (bookingMonth <= presentMonth) and (bookingYear <= presentYear):
         print("Error. The date you have inputted is in the past.")
         bookingDay = int(input("Enter the day you are booking: "))
         userMonth = input("Enter the month you are booking (as a string): ")
@@ -106,13 +111,11 @@ def CreateBooking():
         bookingMonth = temp
         bookingYear = int(input("Enter the year you are booking: "))
 
-# ----------------------------------------------------------------------------------------------------------------------
+    # -------------
 
-    print("Now you will enter the booking time. \nYou can use both 12 or 24 hour but use [HHMM] or [HMM] format.")
+    print("Now you will enter the booking time. \nPlease use 24 hour times with [HHMM] or [HMM] format.")
     startTime = int(input("Please enter the time the meeting will start: "))
     endTime = int(input("Please enter the time the meeting will end: "))
-    print(startTime)
-    print(endTime)
 
     global time1
     global time2
@@ -123,7 +126,6 @@ def CreateBooking():
     if len(time1) == 3:
         temp1 = '0' + time1
         temp2 = temp1[:2] + ':' + temp1[2:]
-        stringTime1 = temp1[:2] + ':' + temp1[2:]
         time1 = temp2
     else:
         temp = time1[:2] + ':' + time1[2:]
@@ -136,9 +138,15 @@ def CreateBooking():
         temp = time2[:2] + ':' + time2[2:]
         time2 = temp
 
-# ----------------------------------------------------------------------------------------------------------------------
+    # --------------
 
-    while (hour3 > 23) or (minutes3 > 60) or (hour4 > 23) or (minutes4 > 60):
+    global roomBooked
+    hour1 = startTime // 100
+    hour2 = endTime // 100
+    minutes1 = startTime % 100
+    minutes2 = endTime % 100
+
+    while (hour1 >= 24) or (minutes1 > 60) or (hour2 >= 24) or (minutes2 > 60) or (endTime < startTime):
         print("Error. Please input the time again.")
         startTime = int(input("Please enter the time the meeting will start: "))
         endTime = int(input("Please enter the time the meeting will end: "))
@@ -148,12 +156,12 @@ def CreateBooking():
         userRoom = int(input("Please choose a meeting room by typing 1-4: "))
 
     if endTime < startTime:
-        print("You have incorrectly inputted your booking, make sure that the start date is before the end date.")
-    roomBooked = False
+        print("You have incorrectly inputted your booking, make sure that the start time is before the end time.")
 
-# ----------------------------------------------------------------------------------------------------------------------
+    # ----------------
 
     csv_file = csv.reader(open('bookingLog.csv', "r"), delimiter=",")
+    fullRoom = False
     for roomBooked in csv_file:
         bookedDay = roomBooked[1]
         bookedMonth = (monthsOfYear[roomBooked[2].strip()])
@@ -161,7 +169,7 @@ def CreateBooking():
         bookedStartTime = int(roomBooked[4].strip().replace(':', ''))
         bookedEndTime = int(roomBooked[5].strip().replace(':', ''))
         roomBookedName = roomBooked[6]
-        if roomBookedName.strip() == userRoom.strip():
+        if roomBookedName.strip() == userRoom:
             if int(bookedDay) != int(bookingDay):
                 continue
             if int(bookedMonth) != int(bookingMonth):
@@ -170,11 +178,28 @@ def CreateBooking():
                 continue
             if (bookedStartTime >= startTime <= bookedEndTime) or (bookedStartTime <= startTime >= bookedEndTime) or (
                     bookedStartTime >= endTime <= bookedEndTime) or (bookedStartTime <= endTime >= bookedEndTime):
-                roomBooked = True
+                fullRoom = True
                 break
-    if roomBooked:
+    if fullRoom:
         print("That room is booked out at that time, please choose another room.")
+
+    bookingRef = (random.randint(0, 10000))
+
+    with open('bookingLog.csv', 'rt') as f:
+        reader = csv.reader(f, delimiter=',')
+        for row in reader:
+            while bookingRef in row:
+                bookingRef = (random.randint(0, 10000))
+                return bookingRef
+
+    booking = [name, bookingDay, userMonth, bookingYear, time1, time2, userRoom, bookingRef]
+    with open("bookingLog.csv", "a") as f:
+        for item in booking:
+            f.write("%s," % item)
+        f.write("\n")
+    print("--------------------------------------")
     print("Your meeting has successfully been booked.")
+    MainMenu()
 
 # ----------------------------------------------------------------------------------------------------------------------
 def ViewBooking():
@@ -184,47 +209,40 @@ def ViewBooking():
             if name in row:
                 print("--------------------------------------")
                 print(
-                    "Date booked: " + row[1] + " " + row[2] + " " + row[3] + "\nMeeting Time: " + row[4] + "-" + row[5] +"\nRoom Booked: " +row[6])
+                    "Date booked: " + row[1] + " " + row[2] + " " + row[3] + "\nMeeting Time: " + row[4] + "-" + row[
+                        5] + "\nRoom Booked: " + row[6] + "\nBooking Ref Number: " + row[7])
                 print("--------------------------------------")
     MainMenu()
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 def DeleteBooking():
-    global whichBookingName
+    global whichBookingName, input
     global whichBookingDate
     global whichBookingTime
     global whichBookingRoom
-    whichBookingName = input("Please enter the name of the booking you want to delete: ")
+    global delRef
+    delName = input("Please enter the name of the booking you want to delete: ")
     with open('bookingLog.csv', 'rt') as f:
         reader = csv.reader(f, delimiter=',')
         for row in reader:
-            if whichBookingName in row:
+            if delName in row:
                 print("--------------------------------------")
                 print(
-                    "Date booked: " + row[1] + " " + row[2] + " " + row[3] + "\nMeeting Time: " + row[4] + "-" + row[5] +"\nRoom Booked: " +row[6])
+                    "Date booked: " + row[1] + " " + row[2] + " " + row[3] + "\nMeeting Time: " + row[4] + "-" + row[
+                        5] + "\nRoom Booked: " + row[6] + "\nBooking Ref Number: " + row[7])
                 print("--------------------------------------")
-    whichBookingDate = input("Please enter the date of the booking you want to delete (DD/MM/YYYY): ")
-    whichBookingTime = input("Please enter the start time of the booking you want to delete: ")
-    whichBookingRoom = input("Please enter the room of the booking you want to delete: ")
-    with open('bookingLog.csv', 'rt') as inp, open('bookingLog_edit.csv', 'wb') as out:
-        writer = csv.writer(out)
-        for row in csv.reader(inp):
-            if whichBookingDate and whichBookingTime and whichBookingRoom in row:
+    delRef = input("Please enter the reference number of the booking you want to delete: ")
+    with open("bookingLog.csv", "r") as f:
+        data = list(csv.reader(f))
+    with open("bookingLog.csv", "w", newline='') as f:
+        writer = csv.writer(f)
+        for row in data:
+            if delRef != row[7]:
                 writer.writerow(row)
-                print("--------------------------------------")
-                print("Booking Deleted.")
+    print("--------------------------------------")
+    print("Booking successfully deleted.\n")
     MainMenu()
-
-# ----------------------------------------------------------------------------------------------------------------------
-def Booking():
-    booking = [name, strDay, userMonth, strYear, time1, time2, bookingData[2]]
-    with open('bookingLog.csv', mode='a') as csv_file:
-        fieldnames = ['Name', 'Day', 'Month', 'Year', 'Meeting Starts', 'Meeting Ends', 'Chosen Room']
-        writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
-    with open("bookingLog.csv", "a") as f:
-        for item in booking:
-            f.write("%s," % item)
-        f.write("\n")
 
 # ----------------------------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
@@ -232,4 +250,3 @@ if __name__ == '__main__':
     CreateBooking()
     ViewBooking()
     DeleteBooking()
-    Booking()
