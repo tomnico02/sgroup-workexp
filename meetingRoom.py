@@ -244,9 +244,11 @@ def DeleteBooking():
     print("Booking successfully deleted.\n")
     MainMenu()
 
+
 # ----------------------------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
     MainMenu()
     CreateBooking()
     ViewBooking()
     DeleteBooking()
+
