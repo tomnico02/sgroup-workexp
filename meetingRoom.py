@@ -102,8 +102,7 @@ def CreateBooking():
 
     bookingDate = ('bookingDay' + 'bookingMonth' + 'bookingYear')
 
-    while (bookingDay <= presentDay) and (bookingMonth <= presentMonth) and (bookingYear <= presentYear) or (
-            bookingYear < presentYear) or (bookingMonth <= presentMonth) and (bookingYear <= presentYear):
+    while (bookingYear < presentYear) or (bookingYear < presentYear) and (bookingMonth < presentMonth) or (bookingYear <= presentYear) and (bookingMonth <= presentMonth) and (bookingDay < presentDay):
         print("Error. The date you have inputted is in the past.")
         bookingDay = int(input("Enter the day you are booking: "))
         userMonth = input("Enter the month you are booking (as a string): ")
@@ -116,6 +115,17 @@ def CreateBooking():
     print("Now you will enter the booking time. \nPlease use 24 hour times with [HHMM] or [HMM] format.")
     startTime = int(input("Please enter the time the meeting will start: "))
     endTime = int(input("Please enter the time the meeting will end: "))
+
+    while endTime < startTime:
+        print("Now you will enter the booking time. \nPlease use 24 hour times with [HHMM] or [HMM] format.")
+        startTime = int(input("Please enter the time the meeting will start: "))
+        endTime = int(input("Please enter the time the meeting will end: "))
+
+    while startTime < presentTime and (bookingYear == presentYear) and (bookingMonth == presentMonth) and (bookingDay == presentDay):
+        print("--------------------------------------")
+        print("Time inputted in the past, you will now start the booking process again.")
+        print("--------------------------------------")
+        CreateBooking()
 
     global time1
     global time2
@@ -150,14 +160,22 @@ def CreateBooking():
         print("Error. Please input the time again.")
         startTime = int(input("Please enter the time the meeting will start: "))
         endTime = int(input("Please enter the time the meeting will end: "))
+        hour1 = startTime // 100
+        hour2 = endTime // 100
+        minutes1 = startTime % 100
+        minutes2 = endTime % 100
 
     userRoom = int(input("Please choose a meeting room by typing 1-4: "))
     while 1 > userRoom or userRoom > 4:
         userRoom = int(input("Please choose a meeting room by typing 1-4: "))
 
-    if endTime < startTime:
-        print("You have incorrectly inputted your booking, make sure that the start time is before the end time.")
 
+    with open('bookingLog.csv', 'rt') as f:
+        reader = csv.reader(f, delimiter=',')
+        for row in reader:
+            while bookingDay and userMonth and bookingYear and time1 and time2 and userRoom in row:
+                print("That room is already booked for that time, please choose another room.")
+                userRoom = int(input("Please choose a meeting room by typing 1-4: "))
     # ----------------
 
     csv_file = csv.reader(open('bookingLog.csv', "r"), delimiter=",")
